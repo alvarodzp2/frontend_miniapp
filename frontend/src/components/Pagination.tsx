@@ -23,5 +23,4 @@ export const Pagination = ({ page, totalPages, onPageChange }: PaginationProps) 
   );
 };
 
-// export vacío para que TypeScript reconozca el archivo como módulo
 export {};
