@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import "../styles/Modal.css";
+
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -8,28 +9,38 @@ interface ModalProps {
 }
 
 export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
-  const modalRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const lastFocusedElement = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (isOpen) {
-      lastFocusedElement.current = document.activeElement as HTMLElement;
+      lastFocusedElement.current = document.activeElement as HTMLElement | null;
     }
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+
+      if (!isOpen) return;
+
+      if (e.key === "Escape" || e.key === "Esc") {
+        e.preventDefault();
         onClose();
+        return;
       }
-      // Focus trap
+
+      // Focus-trap básico
       if (e.key === "Tab" && modalRef.current) {
         const focusableEls = modalRef.current.querySelectorAll<HTMLElement>(
           "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])"
         );
-        const focusArray = Array.from(focusableEls);
+        const focusArray = Array.from(focusableEls).filter(el => !el.hasAttribute("disabled"));
+        if (focusArray.length === 0) {
+          //  evitar tab fuera del modal
+          e.preventDefault();
+          return;
+        }
         const first = focusArray[0];
         const last = focusArray[focusArray.length - 1];
 
@@ -42,18 +53,21 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
         }
       }
     };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
   }, [isOpen, onClose]);
 
-  // Enfocar botón cerrar al abrir
   useEffect(() => {
-    if (isOpen && closeButtonRef.current) {
-      closeButtonRef.current.focus();
+    if (isOpen) {
+      // delay corto para garantizar que el elemento esté en DOM
+      setTimeout(() => {
+        closeButtonRef.current?.focus();
+      }, 0);
     }
   }, [isOpen]);
 
-  // Devolver foco al botón que abrió el modal
+  // Devolver foco al elemento que lo tenía antes
   useEffect(() => {
     if (!isOpen && lastFocusedElement.current) {
       lastFocusedElement.current.focus();
@@ -68,23 +82,36 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
       aria-modal="true"
       aria-labelledby="modal-title"
       ref={modalRef}
-      className="modal-backdrop" 
-      onClick={onClose}
+      className="modal-backdrop"
+      onClick={onClose} 
     >
       <div
-
-        className="modal-content" 
+        className="modal-content"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id="modal-title">{title}</h2>
-        {children}
+        { /* Botón de cerrar en esquina superior derecha */ }
         <button
           ref={closeButtonRef}
+          className="modal-close-x"
           onClick={onClose}
-          style={{ marginTop: "12px" }}
+          aria-label="Cerrar modal"
+          type="button"
         >
-          Cerrar
+          X
         </button>
+
+        <h2 id="modal-title">{title}</h2>
+        {children}
+
+        <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
+          <button
+            onClick={onClose}
+            className="modal-close-btn"
+            type="button"
+          >
+            Cerrar
+          </button>
+        </div>
       </div>
     </div>
   );
