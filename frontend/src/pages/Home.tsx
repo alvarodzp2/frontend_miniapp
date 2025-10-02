@@ -1,12 +1,16 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useFetchProducts } from "../hooks/useFetchProducts";
 import { SearchBar } from "../components/SearchBar";
 import { ProductCard } from "../components/ProductCard";
 import { Product } from "../context/FavoritesContext";
+import { useTheme } from "../context/ThemeContext"; 
 import "../styles/Home.css"; 
 
 function Home() {
-  const { products, loading, error, page, totalPages, setPage } = useFetchProducts({ pageSize: 8 });
+  const { products, loading, error, page, totalPages, setPage } = useFetchProducts({ pageSize: 5 });
+
+  // Obtener el tema actual
+  const { theme } = useTheme();
 
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Product | null>(null);
@@ -16,6 +20,24 @@ function Home() {
       p.title.toLowerCase().includes(search.toLowerCase())
     );
   }, [products, search]);
+  
+  const modalContentStyle: React.CSSProperties = {
+      // Forzar el fondo del modal a usar la variable de tema para el fondo de la tarjeta
+      backgroundColor: theme === 'dark' ? 'var(--card-bg)' : 'white',
+      // Forzar el color base de texto del modal a usar la variable de tema
+      color: theme === 'dark' ? 'var(--text-color)' : 'black',
+      
+      padding: '20px', 
+      borderRadius: '8px',
+      maxWidth: '400px', 
+      maxHeight: '80vh', 
+      overflowY: 'auto',
+  };
+  
+  const textColorStyle: React.CSSProperties = {
+      // Forzamos el color del texto a la variable del tema.
+      color: theme === 'dark' ? 'var(--text-color)' : 'inherit',
+  };
 
   return (
     <div className="home-container">
@@ -69,15 +91,19 @@ function Home() {
           <div
             className="modal-content"
             onClick={(e) => e.stopPropagation()}
+            // Aplicar el estilo condicional al contenedor principal (fondo y color base)
+            style={modalContentStyle} 
           >
-            <h2>{selected.title}</h2>
+            {/* Aplicar el color de texto condicional a los elementos internos */}
+            <h2 style={textColorStyle}>{selected.title}</h2>
             <img
               src={selected.image}
               alt={selected.title}
               className="modal-image"
             />
-            <p>{selected.description}</p>
-            <p>
+            {/* El párrafo de la descripción se hará blanco en modo oscuro */}
+            <p style={textColorStyle}>{selected.description}</p>
+            <p style={textColorStyle}>
               <strong>${selected.price.toFixed(2)}</strong>
             </p>
             <button onClick={() => setSelected(null)} className="close-button">

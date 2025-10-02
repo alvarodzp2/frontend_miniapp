@@ -5,10 +5,10 @@ import type { Product } from "../context/FavoritesContext";
 const API_URL = "https://fakestoreapi.com/products";
 
 interface UseFetchProductsProps {
-  pageSize?: number; // cantidad de productos por página
+  pageSize?: number; 
 }
 
-export const useFetchProducts = ({ pageSize = 10 }: UseFetchProductsProps = {}) => {
+export const useFetchProducts = ({ pageSize = 5}: UseFetchProductsProps = {}) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);

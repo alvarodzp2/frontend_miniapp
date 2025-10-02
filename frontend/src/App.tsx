@@ -5,8 +5,7 @@ import { FavoritesProvider } from "./context/FavoritesContext";
 import { ThemeToggle } from "./components/ThemeToggle";
 import NavBar from "./components/NavBar";
 import Home from "./pages/Home";
-import Favorites from "./pages/Favorites";
-
+import { Favorites } from "./pages/Favorites";
 function App() {
   return (
     <ThemeProvider>

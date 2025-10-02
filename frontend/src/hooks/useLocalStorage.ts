@@ -1,4 +1,3 @@
-// src/hooks/useLocalStorage.ts
 import { useState, useEffect } from "react";
 
 export const useLocalStorage = <T>(key: string, initialValue: T) => {
@@ -25,5 +24,4 @@ export const useLocalStorage = <T>(key: string, initialValue: T) => {
   return [storedValue, setValue] as const;
 };
 
-// export vacío para que TypeScript reconozca este archivo como módulo
 export {};

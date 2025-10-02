@@ -1,6 +1,5 @@
-// src/components/Modal.tsx
-import React from "react";
-
+import React, { useEffect, useRef } from "react";
+import "../styles/Modal.css";
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -9,38 +8,84 @@ interface ModalProps {
 }
 
 export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const lastFocusedElement = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      lastFocusedElement.current = document.activeElement as HTMLElement;
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+      // Focus trap
+      if (e.key === "Tab" && modalRef.current) {
+        const focusableEls = modalRef.current.querySelectorAll<HTMLElement>(
+          "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])"
+        );
+        const focusArray = Array.from(focusableEls);
+        const first = focusArray[0];
+        const last = focusArray[focusArray.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
+  // Enfocar botón cerrar al abrir
+  useEffect(() => {
+    if (isOpen && closeButtonRef.current) {
+      closeButtonRef.current.focus();
+    }
+  }, [isOpen]);
+
+  // Devolver foco al botón que abrió el modal
+  useEffect(() => {
+    if (!isOpen && lastFocusedElement.current) {
+      lastFocusedElement.current.focus();
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.6)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-      onClick={onClose} // cerrar al hacer clic afuera
+      aria-labelledby="modal-title"
+      ref={modalRef}
+      className="modal-backdrop" 
+      onClick={onClose}
     >
       <div
-        style={{
-          background: "white",
-          padding: "20px",
-          borderRadius: "8px",
-          maxWidth: "400px",
-        }}
-        onClick={(e) => e.stopPropagation()} // evitar cierre si clic dentro
+
+        className="modal-content" 
+        onClick={(e) => e.stopPropagation()}
       >
-        <h2>{title}</h2>
+        <h2 id="modal-title">{title}</h2>
         {children}
-        <button onClick={onClose} style={{ marginTop: "12px" }}>Cerrar</button>
+        <button
+          ref={closeButtonRef}
+          onClick={onClose}
+          style={{ marginTop: "12px" }}
+        >
+          Cerrar
+        </button>
       </div>
     </div>
   );
 };
-
-// export vacío para que TypeScript reconozca el archivo como módulo
-export {};

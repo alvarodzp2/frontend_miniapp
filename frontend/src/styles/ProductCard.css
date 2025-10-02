@@ -1,0 +1,28 @@
+.product-card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 12px;
+  width: 220px;
+  text-align: center;
+
+  background-color: var(--card-bg);
+  color: var(--text-color);
+
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.product-card img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+.product-card h3 {
+  font-size: 14px;
+  min-height: 40px;
+}
+
+.product-card p {
+  font-weight: bold;
+}

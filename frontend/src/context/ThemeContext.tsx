@@ -44,5 +44,4 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   );
 };
 
-// Hook para usar el contexto
 export const useTheme = () => useContext(ThemeContext);
